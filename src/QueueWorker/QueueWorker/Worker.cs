@@ -28,8 +28,7 @@ public class Worker : BackgroundService
             {
                 _logger.LogError(ex, "Error processing messages");
             }
-
-            // Esperar 5 segundos antes de verificar nuevos mensajes
+            
             await Task.Delay(5000, stoppingToken);
         }
     }
@@ -38,8 +37,7 @@ public class Worker : BackgroundService
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        // Obtener mensajes no procesados
+        
         var unprocessedMessages = await dbContext.MessageQueue
             .Where(m => !m.IsProcessed)
             .OrderBy(m => m.CreatedAt)
@@ -62,8 +60,7 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Processing message {MessageId} with correlation {CorrelationId}", 
                 message.MessageId, message.CorrelationId);
-
-            // Deserializar el mensaje
+            
             var productMessage = JsonSerializer.Deserialize<ProductMessage>(message.MessageBody, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -74,14 +71,12 @@ public class Worker : BackgroundService
                 _logger.LogWarning("Could not deserialize message {MessageId}", message.MessageId);
                 return;
             }
-
-            // Buscar si el producto ya existe (idempotencia)
+            
             var existingProduct = await dbContext.Products
                 .FirstOrDefaultAsync(p => p.ExternalId == productMessage.ExternalId);
 
             if (existingProduct != null)
-            {
-                // Actualizar producto existente
+            {                
                 existingProduct.Name = productMessage.Name;
                 existingProduct.Price = productMessage.Price;
                 existingProduct.Currency = productMessage.Currency;
@@ -92,8 +87,7 @@ public class Worker : BackgroundService
                     productMessage.ExternalId, message.CorrelationId);
             }
             else
-            {
-                // Insertar nuevo producto
+            {                
                 var newProduct = new Product
                 {
                     ExternalId = productMessage.ExternalId,
@@ -109,8 +103,7 @@ public class Worker : BackgroundService
                 _logger.LogInformation("Inserted new product {ExternalId} - CorrelationId: {CorrelationId}", 
                     productMessage.ExternalId, message.CorrelationId);
             }
-
-            // Marcar mensaje como procesado
+            
             message.IsProcessed = true;
             message.ProcessedAt = DateTime.UtcNow;
         }
@@ -122,7 +115,6 @@ public class Worker : BackgroundService
     }
 }
 
-// Clase para deserializar mensajes
 public class ProductMessage
 {
     public string ExternalId { get; set; } = string.Empty;

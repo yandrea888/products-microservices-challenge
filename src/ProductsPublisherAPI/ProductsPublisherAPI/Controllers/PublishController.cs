@@ -25,8 +25,7 @@ namespace ProductsPublisherAPI.Controllers
         public async Task<IActionResult> PublishProducts()
         {
             try
-            {
-                // 1. Obtener token del AuthServer
+            {                
                 Console.WriteLine("Getting access token from AuthServer...");
                 var accessToken = await _authService.GetAccessTokenAsync();
                 
@@ -34,8 +33,7 @@ namespace ProductsPublisherAPI.Controllers
                 {
                     return BadRequest("Failed to get access token");
                 }
-
-                // 2. Obtener productos del ProductsApi
+                
                 Console.WriteLine("Getting products from ProductsApi...");
                 var products = await _productsService.GetProductsAsync(accessToken);
 
@@ -43,8 +41,7 @@ namespace ProductsPublisherAPI.Controllers
                 {
                     return BadRequest("No products found");
                 }
-
-                // 3. Escribir cada producto a la cola (base de datos)
+                
                 Console.WriteLine($"Writing {products.Count} products to message queue...");
                 
                 foreach (var product in products)

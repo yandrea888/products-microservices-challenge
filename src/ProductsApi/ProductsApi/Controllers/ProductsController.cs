@@ -6,13 +6,12 @@ namespace ProductsApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Requiere JWT
+    [Authorize] 
     public class ProductsController : ControllerBase
     {
         [HttpGet]
         public IActionResult GetProducts(int page = 1, int pageSize = 50)
-        {
-            // Datos hardcodeados como pide el reto
+        {            
             var allProducts = GenerateSampleProducts();
             
             var totalCount = allProducts.Count;

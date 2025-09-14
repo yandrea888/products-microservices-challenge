@@ -14,17 +14,16 @@ namespace QueueWorker.Data
         public DbSet<MessageQueue> MessageQueue { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // Configurar Product
+        {            
             modelBuilder.Entity<Product>()
                 .HasIndex(p => p.ExternalId)
-                .IsUnique(); // Para evitar duplicados
+                .IsUnique(); 
 
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasPrecision(18, 2);
 
-            // Configurar MessageQueue  
+              
             modelBuilder.Entity<MessageQueue>()
                 .HasIndex(m => m.MessageId)
                 .IsUnique();
